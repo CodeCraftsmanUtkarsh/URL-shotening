@@ -1,5 +1,5 @@
 from fastapi import FastAPI
 app = FastAPI()
-@app.get("/health-check")
+@app.get("/home")
 def home():
-    
+    return "Hello this is home"
