@@ -9,3 +9,7 @@ def health():
 @app.get("/about")
 def about():
     return {"project":"url shortener"}
+
+@app.get("/hello/{name}")
+def hello(name : str):
+    return f"hello {name}"
