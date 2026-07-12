@@ -16,3 +16,8 @@ def about():
 @app.get("/hello/{name}")
 def hello(name : str):
     return f"hello {name}"
+
+#query param:
+@app.get("/search")
+def search(q:str):
+    return {"search":q} 
