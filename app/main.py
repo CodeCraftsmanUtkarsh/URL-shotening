@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from schemas import URLRequest
 app = FastAPI()
 
 
@@ -21,3 +22,8 @@ def hello(name : str):
 @app.get("/search")
 def search(q:str):
     return {"search":q} 
+@app.post("/shorten")
+def shorten(request: URLRequest):
+    return {
+        "received_url": request.url
+    }
