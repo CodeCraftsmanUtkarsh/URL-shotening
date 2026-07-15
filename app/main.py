@@ -22,3 +22,4 @@ def shorten(request: URLRequest):
     return {
         "received_url": request.url
     }
+
