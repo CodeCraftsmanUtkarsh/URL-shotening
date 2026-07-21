@@ -10,6 +10,7 @@ def health():
 @app.get("/about")
 def about():
     return {"project":"url shortener"}
+#path param
 @app.get("/hello/{name}")
 def hello(name : str):
     return f"hello {name}"
@@ -17,6 +18,7 @@ def hello(name : str):
 @app.get("/search")
 def search(q:str):
     return {"search":q} 
+
 @app.post("/shorten")
 def shorten(request: URLRequest):
     return {
