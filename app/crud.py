@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from utils.models import URL
+from .utils.models import URL
 def create_url(db:Session,original_url:str,short_code:str):
     new_url=URL(
         original_url=original_url,
