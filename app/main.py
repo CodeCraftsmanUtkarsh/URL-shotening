@@ -76,4 +76,14 @@ def redirect_to_url(short_url:str,db:Session=Depends(get_db)):
         return {"error":"URL not found"}
     increment_clicks(db,url)
     return RedirectResponse(url=url.original_url)
-    
+@app.get("/stats/{short_url}")
+def get_stats(short_url:str,db:Session=Depends(get_db)):
+    url=get_url(db,short_url)
+    if not url:
+        return {"error":"url not found"}
+    return {
+        "original_url":url.original_url,
+        "short_url":url.short_code,
+        "clicks":url.clicks,
+        "created_at":url.created_at
+        }
