@@ -8,4 +8,3 @@ class URL(Base):
     short_code=Column(String,unique=True,nullable=False)
     clicks=Column(Integer,default=0)
     created_at=Column(DateTime(timezone=True),default=lambda: datetime.now(timezone.utc))
-    

@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from schemas import URLRequest
 from utils.models import URL
+from crud import create_url
 from utils.db import engine,Base
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
