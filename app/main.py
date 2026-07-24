@@ -6,39 +6,28 @@ from .utils.db import engine, Base, get_db
 from .utils.hash import generate_short_code
 from fastapi.responses import RedirectResponse
 app = FastAPI()
-
 Base.metadata.create_all(bind=engine)
-
-
 @app.get("/")
 def home():
     return {
         "message": "This is my URL shortening service"
     }
-
-
 @app.get("/health")
 def health():
     return {
         "status": "healthy"
     }
-
-
 @app.get("/about")
 def about():
     return {
         "project": "URL Shortener"
     }
-
-
 # Path Parameter
 @app.get("/hello/{name}")
 def hello(name: str):
     return {
         "message": f"Hello {name}"
     }
-
-
 # Query Parameter
 @app.get("/search")
 def search(q: str):
