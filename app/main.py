@@ -1,5 +1,8 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends,Request
 from sqlalchemy.orm import Session
+from slowapi import Limiter,_rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from .schemas import URLRequest
 from .crud import create_url,get_url,increment_clicks,get_url_by_orginal
 from .utils.db import engine, Base, get_db
@@ -7,6 +10,9 @@ from .utils.hash import generate_short_code
 from fastapi.responses import RedirectResponse
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter=limiter
+app.add_exception_handler(RateLimitExceeded,_rate_limit_exceeded_handler)
 @app.get("/")
 def home():
     return {
@@ -35,23 +41,25 @@ def search(q: str):
         "search": q
     }
 @app.post("/shorten")
+@limiter.limit("5/minute")
 def shorten(
-    request: URLRequest,
+    request: Request,
+    body:URLRequest,
     db: Session = Depends(get_db)
 ):
-    existing=get_url_by_orginal(db,str(request.url))
+    existing=get_url_by_orginal(db,str(body.url))
     if existing:
         return {
             "short_code":existing.short_code,
             "original_url":existing.original_url
         }
     short_code = generate_short_code(
-        str(request.url)
+        str(body.url)
     )
     
     url = create_url(
         db,
-        str(request.url),
+        str(body.url),
         short_code
     )
     return {
