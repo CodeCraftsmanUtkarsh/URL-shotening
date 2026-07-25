@@ -45,7 +45,7 @@ def search(q: str):
 def shorten(
     request: Request,
     body:URLRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db )
 ):
     existing=get_url_by_orginal(db,str(body.url))
     if existing:
