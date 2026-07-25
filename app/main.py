@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from .schemas import URLRequest
-from .crud import create_url,get_url,increment_clicks
+from .crud import create_url,get_url,increment_clicks,get_url_by_orginal
 from .utils.db import engine, Base, get_db
 from .utils.hash import generate_short_code
 from fastapi.responses import RedirectResponse
@@ -34,26 +34,26 @@ def search(q: str):
     return {
         "search": q
     }
-
-
 @app.post("/shorten")
 def shorten(
     request: URLRequest,
     db: Session = Depends(get_db)
 ):
-    # Generate short code
+    existing=get_url_by_orginal(db,str(request.url))
+    if existing:
+        return {
+            "short_code":existing.short_code,
+            "original_url":existing.original_url
+        }
     short_code = generate_short_code(
         str(request.url)
     )
-
-    # Store in database
+    
     url = create_url(
         db,
         str(request.url),
         short_code
     )
-
-    # Return response
     return {
         "short_code": url.short_code,
         "original_url": url.original_url

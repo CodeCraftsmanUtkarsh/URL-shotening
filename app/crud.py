@@ -14,3 +14,5 @@ def get_url(db:Session,short_code:str):
 def increment_clicks(db:Session,url:URL):
     url.clicks+=1
     db.commit()
+def get_url_by_orginal(db:Session,original_url:str):
+    return db.query(URL).filter(URL.original_url==original_url).first()
