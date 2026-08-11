@@ -1,2 +1,2 @@
 what to implement next:
-rate limiter(slowapi), auth, tests, postgres for db
+auth, tests, postgres for db

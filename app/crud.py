@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
 from .utils.models import URL
-def create_url(db:Session,original_url:str,short_code:str):
+def create_url(db:Session,original_url:str,short_code:str,expires_at):
     new_url=URL(
         original_url=original_url,
-        short_code=short_code
+        short_code=short_code,
+        expires_at=expires_at
         )
     db.add(new_url)
     db.commit()
