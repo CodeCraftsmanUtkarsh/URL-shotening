@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends,Request
+from fastapi import FastAPI, Depends,Request, HTTPException
 from sqlalchemy.orm import Session
 from slowapi import Limiter,_rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -8,6 +8,7 @@ from .crud import create_url,get_url,increment_clicks,get_url_by_orginal
 from .utils.db import engine, Base, get_db
 from .utils.hash import generate_short_code
 from fastapi.responses import RedirectResponse
+from datetime import datetime, timedelta, timezone
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
 limiter = Limiter(key_func=get_remote_address)
@@ -56,11 +57,13 @@ def shorten(
     short_code = generate_short_code(
         str(body.url)
     )
+    expires_at=(datetime.now(timezone.utc) + timedelta(days=body.expires_in))
     
     url = create_url(
         db,
         str(body.url),
-        short_code
+        short_code,
+        expires_at
     )
     return {
         "short_code": url.short_code,
@@ -70,7 +73,9 @@ def shorten(
 def redirect_to_url(short_url:str,db:Session=Depends(get_db)):
     url=get_url(db,short_url)
     if not url:
-        return {"error":"URL not found"}
+        raise HTTPException(status_code=404,detail="URL Not Found")
+    if datetime.utcnow()>url.expires_at:
+        raise HTTPException(status_code=410,detail="Link has expired")
     increment_clicks(db,url)
     return RedirectResponse(url=url.original_url)
 @app.get("/stats/{short_url}")
@@ -82,5 +87,6 @@ def get_stats(short_url:str,db:Session=Depends(get_db)):
         "original_url":url.original_url,
         "short_url":url.short_code,
         "clicks":url.clicks,
-        "created_at":url.created_at
+        "created_at":url.created_at,
+        "expires_at":url.expires_at
         }
