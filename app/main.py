@@ -78,14 +78,32 @@ def shorten(
         "short_code": url.short_code,
         "original_url": url.original_url
     }
+
 @app.get("/{short_url}")
-def redirect_to_url(short_url:str,db:Session=Depends(get_db)):
-    url=get_url(db,short_url)
+def redirect_to_url(
+    short_url: str,
+    db: Session = Depends(get_db)
+):
+    cached_url = redis_client.get(short_url)
+    if cached_url:
+        return RedirectResponse(url=cached_url)
+    url = get_url(db, short_url)
     if not url:
-        raise HTTPException(status_code=404,detail="URL Not Found")
-    if datetime.utcnow()>url.expires_at:
-        raise HTTPException(status_code=410,detail="Link has expired")
-    increment_clicks(db,url)
+        raise HTTPException(
+            status_code=404,
+            detail="URL Not Found"
+        )
+    if datetime.now(timezone.utc) > url.expires_at:
+        raise HTTPException(
+            status_code=410,
+            detail="Link has expired"
+        )
+    redis_client.setex(
+        short_url,
+        3600,
+        url.original_url
+    )
+    increment_clicks(db, url)
     return RedirectResponse(url=url.original_url)
 
 @app.get("/stats/{short_url}")
