@@ -9,11 +9,20 @@ from .utils.db import engine, Base, get_db
 from .utils.hash import generate_short_code
 from fastapi.responses import RedirectResponse
 from datetime import datetime, timedelta, timezone
+import redis
 app = FastAPI()
+@app.get("/redis-test")
+def redis_test():
+    redis_client.set("msg","redis is working")
+    value=redis_client.get("msg")
+    return {
+        "message":value
+    }
 Base.metadata.create_all(bind=engine)
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter=limiter
 app.add_exception_handler(RateLimitExceeded,_rate_limit_exceeded_handler)
+redis_client=redis.Redis(host="localhost",port=6379,decode_responses=True)
 @app.get("/")
 def home():
     return {
@@ -78,6 +87,7 @@ def redirect_to_url(short_url:str,db:Session=Depends(get_db)):
         raise HTTPException(status_code=410,detail="Link has expired")
     increment_clicks(db,url)
     return RedirectResponse(url=url.original_url)
+
 @app.get("/stats/{short_url}")
 def get_stats(short_url:str,db:Session=Depends(get_db)):
     url=get_url(db,short_url)   
@@ -90,3 +100,7 @@ def get_stats(short_url:str,db:Session=Depends(get_db)):
         "created_at":url.created_at,
         "expires_at":url.expires_at
         }
+
+
+
+    
