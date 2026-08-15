@@ -1,9 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker,declarative_base
-DATABASE_URL= "sqlite:///./urls.db" 
+DATABASE_URL = "postgresql+psycopg://urlshortener:devpassword@localhost:5432/urlshortener"
 engine=create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread":False}
+    DATABASE_URL
     )
 SessionLocal=sessionmaker(
     autocommit=False,
