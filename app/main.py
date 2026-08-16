@@ -118,7 +118,3 @@ def get_stats(short_url:str,db:Session=Depends(get_db)):
         "created_at":url.created_at,
         "expires_at":url.expires_at
         }
-
-
-
-    
